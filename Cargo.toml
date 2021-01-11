@@ -1,0 +1,14 @@
+[package]
+name = "vbitrate-viewer"
+version = "0.1.0"
+authors = ["Takehiro Kajihara <takehiro6021@gmail.com>"]
+edition = "2018"
+description = "Video Bitrate Viewer"
+license = "MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = "2.33.3"
+ffmpeg = { git= "https://github.com/meh/rust-ffmpeg", default-features=false, features = ["codec", "format", "ffmpeg_3_1"]}
+
