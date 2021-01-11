@@ -1,4 +1,4 @@
-name: Rust
+name: vbitrate-viewer
 
 on:
   push:
@@ -10,7 +10,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  rustfmt-clippy:
+  rustfmt:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -20,17 +20,29 @@ jobs:
         profile: minimal
         toolchain: stable
         override: true
-        components: clippy, rustfmt
+        components: rustfmt
     - name: rustfmt
       uses: actions-rs/cargo@v1
       with:
         command: fmt
-    - name: rust-clippy-check
-      uses: actions-rs/clippy-check@v1.0.7
 
-jobs:
+  install_ffmpeg:
+    runs-on: ubuntu-latest
+    steps:
+      - run: sudo apt-get update
+      - run: sudo apt-get install libavcodec-dev libavformat-dev libavfilter-dev
+
+  clippy_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: rustup component add clippy
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features
+
   build:
-
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
