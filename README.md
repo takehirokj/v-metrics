@@ -9,6 +9,7 @@ FFmpeg-libav* library is used to get a bitrate of each frames.
 sudo apt install libavcodec-dev
 sudo apt install libavformat-dev
 sudo apt install libavfilter-dev
+sudo apt install libavutil-dev
 ```
 
 ### Release binary
