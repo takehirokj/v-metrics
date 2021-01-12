@@ -1,4 +1,4 @@
-# vbitrate-viewer
+# vbitrate-viewer [![Actions Status](https://github.com/takehirokj/vbitrate-viewer/workflows/vbitrate-viewer/badge.svg)](https://github.com/takehirokj/vbitrate-viewer/actions)
 
 Showing a graph of a Video bitrate on each frames.
 
