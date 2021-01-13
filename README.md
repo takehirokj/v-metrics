@@ -6,10 +6,7 @@ Showing a graph of a Video bitrate on each frames.
 ### Dependency: FFmpeg
 FFmpeg-libav* library is used to get a bitrate of each frames.
 ```
-sudo apt install libavcodec-dev
-sudo apt install libavformat-dev
-sudo apt install libavfilter-dev
-sudo apt install libavutil-dev
+sudo apt install libavcodec-dev libavformat-dev libavfilter-dev libavutil-dev
 ```
 
 ### Release binary
