@@ -1,5 +1,6 @@
 use clap::{App, Arg};
 use ffmpeg::{format, frame, media::Type};
+use plotlib::{page::Page, repr::BarChart, view::CategoricalView};
 
 fn get_bitrates<P: AsRef<str>>(input_path: P) -> Result<Vec<i32>, String> {
   ffmpeg::init().map_err(|e| e.to_string())?;
@@ -34,8 +35,10 @@ fn main() {
     .about(env!("CARGO_PKG_DESCRIPTION"))
     .version(env!("CARGO_PKG_VERSION"))
     .arg(Arg::with_name("input").short("i").required(true).takes_value(true))
+    .arg(Arg::with_name("output").short("o").required(true).takes_value(true))
     .get_matches();
   let input_path = cli.value_of("input").unwrap();
+  let output_path = cli.value_of("output").unwrap();
   let bitrates = match get_bitrates(&input_path) {
     Ok(res) => res,
     Err(msg) => {
@@ -43,7 +46,14 @@ fn main() {
       return;
     }
   };
-  for b in bitrates {
-    print!("{}, ", b);
+
+  let mut datas = Vec::new();
+  for (i, b) in bitrates.iter().enumerate() {
+    datas.push(BarChart::new(*b as f64).label(i.to_string()));
   }
+  let view = datas.into_iter().fold(
+    CategoricalView::new().x_label("Frame num").y_label("bit"),
+    |view, data| view.add(data),
+  );
+  Page::single(&view).save(output_path).unwrap();
 }

@@ -14,7 +14,7 @@ To build release inary in target/release/vbitrate-viewer
 
 ## Usage
 ```
-cargo run --release -- -i test.mp4
+cargo run --release -- -i input.mp4 -o output.svg
 ```
 
 ## Contributing
