@@ -10,7 +10,11 @@ sudo apt install libavcodec-dev libavformat-dev libavfilter-dev libavutil-dev li
 ```
 
 ### Release binary
-To build release inary in target/release/vbitrate-viewer
+To build release binary in `target/release/vbitrate-viewer`, run:
+
+```sh
+cargo build --release
+```
 
 ## Usage
 ```
