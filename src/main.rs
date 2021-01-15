@@ -1,6 +1,6 @@
 use clap::{App, Arg};
 use ffmpeg::{format, frame, media::Type};
-use plotlib::{page::Page, repr::BarChart, view::CategoricalView};
+use plotters::prelude::*;
 
 fn get_bitrates<P: AsRef<str>>(input_path: P) -> Result<Vec<i32>, String> {
   ffmpeg::init().map_err(|e| e.to_string())?;
@@ -30,7 +30,39 @@ fn get_bitrates<P: AsRef<str>>(input_path: P) -> Result<Vec<i32>, String> {
   Ok(bitrates)
 }
 
-fn main() {
+fn draw_graph<P: AsRef<std::path::Path>>(
+  datas: &[i32],
+  output_path: P,
+) -> Result<(), Box<dyn std::error::Error>> {
+  let root = BitMapBackend::new(&output_path, (1024, 768)).into_drawing_area();
+  root.fill(&WHITE)?;
+
+  let max = *datas.iter().max().unwrap() as f64;
+  let mut chart = ChartBuilder::on(&root)
+    .set_label_area_size(LabelAreaPosition::Left, 80)
+    .set_label_area_size(LabelAreaPosition::Bottom, 60)
+    .build_cartesian_2d(0..(datas.len() - 1), 0.0..max * 1.2)?;
+  chart
+    .configure_mesh()
+    .disable_x_mesh()
+    .disable_y_mesh()
+    .y_desc("bit")
+    .x_desc("Frame no")
+    .draw()?;
+
+  chart.draw_series(
+    AreaSeries::new(
+      (0..).zip(datas.iter()).map(|(x, y)| (x, *y as f64)),
+      0.0,
+      &BLUE.mix(0.2),
+    )
+    .border_style(&BLUE),
+  )?;
+
+  Ok(())
+}
+
+fn main() -> Result<(), String> {
   let cli = App::new(env!("CARGO_PKG_NAME"))
     .about(env!("CARGO_PKG_DESCRIPTION"))
     .version(env!("CARGO_PKG_VERSION"))
@@ -39,21 +71,7 @@ fn main() {
     .get_matches();
   let input_path = cli.value_of("input").unwrap();
   let output_path = cli.value_of("output").unwrap();
-  let bitrates = match get_bitrates(&input_path) {
-    Ok(res) => res,
-    Err(msg) => {
-      println!("Failed: {}", msg);
-      return;
-    }
-  };
-
-  let mut datas = Vec::new();
-  for (i, b) in bitrates.iter().enumerate() {
-    datas.push(BarChart::new(*b as f64).label(i.to_string()));
-  }
-  let view = datas.into_iter().fold(
-    CategoricalView::new().x_label("Frame num").y_label("bit"),
-    |view, data| view.add(data),
-  );
-  Page::single(&view).save(output_path).unwrap();
+  let bitrates = get_bitrates(&input_path)?;
+  draw_graph(&bitrates, &output_path).map_err(|err| err.to_string())?;
+  Ok(())
 }

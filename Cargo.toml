@@ -12,4 +12,4 @@ license = "MIT"
 clap = "2.33.3"
 ffmpeg = { git= "https://github.com/meh/rust-ffmpeg", default-features=false, features = ["codec", "format", "ffmpeg_3_1"]}
 
-plotlib = "0.5.1"
+plotters = "^0.3.0"
