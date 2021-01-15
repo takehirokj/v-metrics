@@ -34,13 +34,15 @@ fn draw_graph<P: AsRef<std::path::Path>>(
   datas: &[i32],
   output_path: P,
 ) -> Result<(), Box<dyn std::error::Error>> {
-  let root = BitMapBackend::new(&output_path, (1024, 768)).into_drawing_area();
+  // TODO Add option to set output size
+  let root =
+    BitMapBackend::new(&output_path, (1920, 1080)).into_drawing_area();
   root.fill(&WHITE)?;
 
   let max = *datas.iter().max().unwrap() as f64;
   let mut chart = ChartBuilder::on(&root)
-    .set_label_area_size(LabelAreaPosition::Left, 80)
-    .set_label_area_size(LabelAreaPosition::Bottom, 60)
+    .set_label_area_size(LabelAreaPosition::Left, (10).percent_width())
+    .set_label_area_size(LabelAreaPosition::Bottom, (10).percent_height())
     .build_cartesian_2d(0..(datas.len() - 1), 0.0..max * 1.2)?;
   chart
     .configure_mesh()
@@ -48,6 +50,7 @@ fn draw_graph<P: AsRef<std::path::Path>>(
     .disable_y_mesh()
     .y_desc("bit")
     .x_desc("Frame no")
+    .label_style(("san-serif", (3).percent_height()))
     .draw()?;
 
   chart.draw_series(
