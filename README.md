@@ -3,10 +3,10 @@
 Showing a graph of a Video bitrate on each frames.
 
 ## Building
-### Dependency: FFmpeg
-FFmpeg-libav* library is used to get a bitrate of each frames.
-```
-sudo apt install libavcodec-dev libavformat-dev libavfilter-dev libavutil-dev
+### Dependency
+FFmpeg-libav* library is used to get a bitrate of each frames and some font library for plotting.
+```sh
+sudo apt install libavcodec-dev libavformat-dev libavfilter-dev libavutil-dev libfontconfig1-dev
 ```
 
 ### Release binary
@@ -14,7 +14,7 @@ To build release inary in target/release/vbitrate-viewer
 
 ## Usage
 ```
-cargo run --release -- -i input.mp4 -o output.svg
+cargo run --release -- -i input.mp4 -o output.png
 ```
 
 ## Contributing

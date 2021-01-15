@@ -29,10 +29,10 @@ jobs:
   clippy_check:
     runs-on: ubuntu-latest
     steps:
-    - name: Install ffmpeg for Ubuntu
+    - name: Install libs for Ubuntu
       run: |
         sudo apt-get update
-        sudo apt install libavutil-dev libavcodec-dev libavformat-dev
+        sudo apt install libavutil-dev libavcodec-dev libavformat-dev libfontconfig1-dev
     - uses: actions/checkout@v1
     - run: rustup component add clippy
     - name: Run clippy
@@ -47,7 +47,7 @@ jobs:
     - name: Install ffmpeg for Ubuntu
       run: |
         sudo apt-get update
-        sudo apt install libavutil-dev libavcodec-dev libavformat-dev
+        sudo apt install libavutil-dev libavcodec-dev libavformat-dev libfontconfig1-dev
     - uses: actions/checkout@v2
     - name: Build
       run: cargo build --verbose
