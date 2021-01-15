@@ -10,29 +10,33 @@ sudo apt install libavcodec-dev libavformat-dev libavfilter-dev libavutil-dev li
 ```
 
 ### Release binary
-To build release inary in target/release/vbitrate-viewer
+To build release binary in `target/release/vbitrate-viewer`, run:
+
+```sh
+cargo build --release
+```
 
 ## Usage
-```
+```sh
 cargo run --release -- -i input.mp4 -o output.png
 ```
 
 ## Contributing
 ### Coding style
 Format code with rustfmt before submitting a PR.
-```
+```sh
 cargo fmt
 ```
 
 ## Code Analysis
 Use [clippy](https://github.com/rust-lang/rust-clippy) before submitting a PR.
-```
+```sh
 cargo clippy
 ```
 
 ## Testing
 Run unit test.
-```
+```sh
 cargo test
 ```
 
