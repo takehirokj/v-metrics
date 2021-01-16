@@ -2,6 +2,8 @@
 
 Showing a graph of a Video bitrate on each frames.
 
+![Image](example/output.png)
+
 ## Building
 ### Dependency
 FFmpeg-libav* library is used to get a bitrate of each frames and some font library for plotting.
