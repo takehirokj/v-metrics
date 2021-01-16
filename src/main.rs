@@ -93,5 +93,19 @@ pub mod test {
     assert!(Path::new(output_path).exists());
     assert!(fs::remove_file(output_path).is_ok());
   }
-}
 
+  #[test]
+  fn get_bitrates_normal() {
+    // Input file is generated command below:
+    //   ffmpeg -r 3 -t 1 -f lavfi -i testsrc -vf scale=320:180 \
+    //   -vcodec libx264 -profile:v baseline -pix_fmt yuv420p testsrc_3_frames.mp4
+    let input_path = "./test/testsrc_3_frames.mp4";
+    let expected = [5068, 206, 174];
+    let bitrates = get_bitrates(&input_path).unwrap();
+
+    assert!(bitrates.len() == expected.len());
+    for (b, e) in bitrates.iter().zip(expected.iter()) {
+      assert!(b == e);
+    }
+  }
+}
