@@ -75,3 +75,20 @@ fn main() -> Result<(), String> {
   draw_graph(&bitrates, &output_path).map_err(|err| err.to_string())?;
   Ok(())
 }
+
+#[cfg(test)]
+pub mod test {
+  use super::*;
+  use std::fs;
+  use std::path::Path;
+
+  #[test]
+  fn draw_normal_graph() {
+    let datas = [3000, 2000, 1500];
+    let output_path = "./draw_graph_test.png";
+    assert!(draw_graph(&datas, output_path).is_ok());
+    assert!(Path::new(output_path).exists());
+    assert!(fs::remove_file(output_path).is_ok());
+  }
+}
+
