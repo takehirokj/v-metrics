@@ -2,6 +2,11 @@ use clap::{App, Arg};
 use ffmpeg::{format, frame, media::Type};
 use plotters::prelude::*;
 
+struct Resolution {
+  w: u32,
+  h: u32,
+}
+
 fn get_bitrates<P: AsRef<str>>(input_path: P) -> Result<Vec<i32>, String> {
   ffmpeg::init().map_err(|e| e.to_string())?;
   let mut ictx = format::input(&input_path).map_err(|e| e.to_string())?;
@@ -32,11 +37,11 @@ fn get_bitrates<P: AsRef<str>>(input_path: P) -> Result<Vec<i32>, String> {
 
 fn draw_graph<P: AsRef<std::path::Path>>(
   datas: &[i32],
+  output_size: Resolution,
   output_path: P,
 ) -> Result<(), Box<dyn std::error::Error>> {
-  // TODO Add option to set output size
-  let root =
-    BitMapBackend::new(&output_path, (1920, 1080)).into_drawing_area();
+  let root = BitMapBackend::new(&output_path, (output_size.w, output_size.h))
+    .into_drawing_area();
   root.fill(&WHITE)?;
 
   let max = *datas.iter().max().unwrap() as f64;
@@ -71,11 +76,29 @@ fn main() -> Result<(), String> {
     .version(env!("CARGO_PKG_VERSION"))
     .arg(Arg::with_name("input").short("i").required(true).takes_value(true))
     .arg(Arg::with_name("output").short("o").required(true).takes_value(true))
+    .arg(
+      Arg::with_name("output_size")
+        .short("s")
+        .takes_value(true)
+        .use_delimiter(true)
+        .require_delimiter(true)
+        .value_delimiter(":")
+        .default_value("1920:1080")
+        .help("Sets a output size (width:height)"),
+    )
     .get_matches();
   let input_path = cli.value_of("input").unwrap();
   let output_path = cli.value_of("output").unwrap();
+  let output_size = cli
+    .values_of("output_size")
+    .unwrap()
+    .map(|s| s.parse::<u32>().unwrap())
+    .collect::<Vec<u32>>();
+  let output_size = Resolution { w: output_size[0], h: output_size[1] };
+
   let bitrates = get_bitrates(&input_path)?;
-  draw_graph(&bitrates, &output_path).map_err(|err| err.to_string())?;
+  draw_graph(&bitrates, output_size, &output_path)
+    .map_err(|err| err.to_string())?;
   Ok(())
 }
 
@@ -88,8 +111,9 @@ pub mod test {
   #[test]
   fn draw_normal_graph() {
     let datas = [3000, 2000, 1500];
+    let output_size = Resolution { w: 1280, h: 960 };
     let output_path = "./draw_graph_test.png";
-    assert!(draw_graph(&datas, output_path).is_ok());
+    assert!(draw_graph(&datas, output_size, output_path).is_ok());
     assert!(Path::new(output_path).exists());
     assert!(fs::remove_file(output_path).is_ok());
   }
