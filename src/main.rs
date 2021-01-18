@@ -74,8 +74,20 @@ fn main() -> Result<(), String> {
   let cli = App::new(env!("CARGO_PKG_NAME"))
     .about(env!("CARGO_PKG_DESCRIPTION"))
     .version(env!("CARGO_PKG_VERSION"))
-    .arg(Arg::with_name("input").short("i").required(true).takes_value(true))
-    .arg(Arg::with_name("output").short("o").required(true).takes_value(true))
+    .arg(
+      Arg::with_name("input")
+        .short("i")
+        .required(true)
+        .takes_value(true)
+        .help("Sets a input file path"),
+    )
+    .arg(
+      Arg::with_name("output")
+        .short("o")
+        .required(true)
+        .takes_value(true)
+        .help("Sets a output file path"),
+    )
     .arg(
       Arg::with_name("output_size")
         .short("s")
