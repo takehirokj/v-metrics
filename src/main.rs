@@ -45,6 +45,8 @@ fn draw_graph<P: AsRef<std::path::Path>>(
   root.fill(&WHITE)?;
 
   let max = *datas.iter().max().unwrap() as f64;
+  let avg = datas.iter().sum::<i32>() / datas.len() as i32;
+
   let mut chart = ChartBuilder::on(&root)
     .set_label_area_size(LabelAreaPosition::Left, (10).percent_width())
     .set_label_area_size(LabelAreaPosition::Bottom, (10).percent_height())
@@ -58,14 +60,16 @@ fn draw_graph<P: AsRef<std::path::Path>>(
     .label_style(("san-serif", (3).percent_height()))
     .draw()?;
 
-  chart.draw_series(
-    AreaSeries::new(
-      (0..).zip(datas.iter()).map(|(x, y)| (x, *y as f64)),
-      0.0,
-      &BLUE.mix(0.2),
-    )
-    .border_style(&BLUE),
-  )?;
+  chart.draw_series(LineSeries::new(
+    (0..).zip(datas.iter()).map(|(x, y)| (x, *y as f64)),
+    &BLUE.mix(0.8),
+  ))?;
+
+  // Draw average bitrate
+  chart.draw_series(LineSeries::new(
+    (0..datas.len()).map(|x| (x, avg as f64)),
+    &RED.mix(0.3),
+  ))?;
 
   Ok(())
 }
