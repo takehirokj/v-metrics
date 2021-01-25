@@ -2,6 +2,12 @@ use clap::{App, Arg};
 use ffmpeg::{format, frame, media::Type};
 use plotters::prelude::*;
 
+struct CliOptions {
+  input_path: Option<String>,
+  output_path: Option<String>,
+  output_size: Resolution,
+}
+
 struct Resolution {
   w: u32,
   h: u32,
@@ -74,7 +80,7 @@ fn draw_graph<P: AsRef<std::path::Path>>(
   Ok(())
 }
 
-fn main() -> Result<(), String> {
+fn parse_cli() -> Result<CliOptions, String> {
   let cli = App::new(env!("CARGO_PKG_NAME"))
     .about(env!("CARGO_PKG_DESCRIPTION"))
     .version(env!("CARGO_PKG_VERSION"))
@@ -103,14 +109,23 @@ fn main() -> Result<(), String> {
         .help("Sets a output size (width:height)"),
     )
     .get_matches();
-  let input_path = cli.value_of("input").unwrap();
-  let output_path = cli.value_of("output").unwrap();
+
+  let input_path = cli.value_of("input").map(|s| s.to_owned());
+  let output_path = cli.value_of("output").map(|s| s.to_owned());
   let output_size = cli
     .values_of("output_size")
     .unwrap()
     .map(|s| s.parse::<u32>().unwrap())
     .collect::<Vec<u32>>();
   let output_size = Resolution { w: output_size[0], h: output_size[1] };
+  Ok(CliOptions { input_path, output_path, output_size })
+}
+
+fn main() -> Result<(), String> {
+  let cli = parse_cli()?;
+  let input_path = cli.input_path.unwrap();
+  let output_path = cli.output_path.unwrap();
+  let output_size = cli.output_size;
 
   let bitrates = get_bitrates(&input_path)?;
   draw_graph(&bitrates, output_size, &output_path)
