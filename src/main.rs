@@ -6,6 +6,7 @@ struct CliOptions {
   input_path: Option<String>,
   output_path: Option<String>,
   output_size: Resolution,
+  bpp: bool, // bit per pixel
 }
 
 struct Resolution {
@@ -16,7 +17,7 @@ struct Resolution {
 struct VideoInfo {
   w: u32,
   h: u32,
-  bits: Vec<i32>,
+  bits: Vec<f64>,
 }
 
 fn get_video_info<P: AsRef<str>>(input_path: P) -> Result<VideoInfo, String> {
@@ -43,7 +44,7 @@ fn get_video_info<P: AsRef<str>>(input_path: P) -> Result<VideoInfo, String> {
       }
 
       if res.is_ok() {
-        let bit = decoded_frame.packet().size as i32;
+        let bit = decoded_frame.packet().size as f64;
         v_info.bits.push(bit);
       }
     }
@@ -53,7 +54,8 @@ fn get_video_info<P: AsRef<str>>(input_path: P) -> Result<VideoInfo, String> {
 }
 
 fn draw_graph<P: AsRef<std::path::Path>>(
-  datas: &[i32],
+  datas: &[f64],
+  y_label: &str,
   output_size: Resolution,
   output_path: P,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -61,8 +63,8 @@ fn draw_graph<P: AsRef<std::path::Path>>(
     .into_drawing_area();
   root.fill(&WHITE)?;
 
-  let max = *datas.iter().max().unwrap() as f64;
-  let avg = datas.iter().sum::<i32>() / datas.len() as i32;
+  let max = datas.iter().fold(f64::NAN, |m, v| v.max(m)) as f64;
+  let avg = datas.iter().sum::<f64>() / datas.len() as f64;
 
   let mut chart = ChartBuilder::on(&root)
     .set_label_area_size(LabelAreaPosition::Left, (10).percent_width())
@@ -72,7 +74,7 @@ fn draw_graph<P: AsRef<std::path::Path>>(
     .configure_mesh()
     .disable_x_mesh()
     .disable_y_mesh()
-    .y_desc("bit")
+    .y_desc(y_label)
     .x_desc("Frame no")
     .label_style(("san-serif", (3).percent_height()))
     .draw()?;
@@ -119,6 +121,11 @@ fn parse_cli() -> Result<CliOptions, String> {
         .default_value("1920:1080")
         .help("Sets a output size (width:height)"),
     )
+    .arg(
+      Arg::with_name("bit_per_pixel")
+        .long("bpp")
+        .help("Sets to output bit per pixel"),
+    )
     .get_matches();
 
   let input_path = cli.value_of("input").map(|s| s.to_owned());
@@ -129,8 +136,9 @@ fn parse_cli() -> Result<CliOptions, String> {
     .map(|s| s.parse::<u32>().unwrap())
     .collect::<Vec<u32>>();
   let output_size = Resolution { w: output_size[0], h: output_size[1] };
+  let bpp = cli.is_present("bit_per_pixel");
 
-  Ok(CliOptions { input_path, output_path, output_size })
+  Ok(CliOptions { input_path, output_path, output_size, bpp })
 }
 
 fn main() -> Result<(), String> {
@@ -138,8 +146,21 @@ fn main() -> Result<(), String> {
   let input_path = cli.input_path.unwrap();
   let output_path = cli.output_path.unwrap();
   let output_size = cli.output_size;
+  let use_bpp = cli.bpp;
+
   let v_info = get_video_info(&input_path)?;
-  draw_graph(&v_info.bits, output_size, &output_path)
+  let (data, y_label) = if use_bpp {
+    let pix_num = v_info.w * v_info.h;
+    let bpps = v_info
+      .bits
+      .iter()
+      .map(|x| *x as f64 / pix_num as f64)
+      .collect::<Vec<f64>>();
+    (bpps, "bit per pixel")
+  } else {
+    (v_info.bits, "bit")
+  };
+  draw_graph(&data, y_label, output_size, &output_path)
     .map_err(|err| err.to_string())?;
   Ok(())
 }
@@ -152,10 +173,10 @@ pub mod test {
 
   #[test]
   fn draw_normal_graph() {
-    let datas = [3000, 2000, 1500];
+    let datas = [3000.0, 2000.0, 1500.0];
     let output_size = Resolution { w: 1280, h: 960 };
     let output_path = "./draw_graph_test.png";
-    assert!(draw_graph(&datas, output_size, output_path).is_ok());
+    assert!(draw_graph(&datas, "bit", output_size, output_path).is_ok());
     assert!(Path::new(output_path).exists());
     assert!(fs::remove_file(output_path).is_ok());
   }
@@ -166,7 +187,7 @@ pub mod test {
     //   ffmpeg -r 3 -t 1 -f lavfi -i testsrc -vf scale=320:180 \
     //   -vcodec libx264 -profile:v baseline -pix_fmt yuv420p testsrc_3_frames.mp4
     let input_path = "./test/testsrc_3_frames.mp4";
-    let expected = [5068, 206, 174];
+    let expected = [5068.0, 206.0, 174.0];
     let v_info = get_video_info(&input_path).unwrap();
 
     assert!(v_info.w == 320 && v_info.h == 180);
