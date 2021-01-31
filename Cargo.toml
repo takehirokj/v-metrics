@@ -1,9 +1,9 @@
 [package]
-name = "vbitrate-viewer"
+name = "v-metrics"
 version = "0.1.0"
 authors = ["Takehiro Kajihara <takehiro6021@gmail.com>"]
 edition = "2018"
-description = "Video Bitrate Viewer"
+description = "Showing video metrics"
 license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

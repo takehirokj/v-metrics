@@ -1,4 +1,4 @@
-# vbitrate-viewer [![Actions Status](https://github.com/takehirokj/vbitrate-viewer/workflows/vbitrate-viewer/badge.svg)](https://github.com/takehirokj/vbitrate-viewer/actions)
+# v-metrics [![Actions Status](https://github.com/takehirokj/v-metrics/workflows/v-metrics/badge.svg)](https://github.com/takehirokj/v-metrics/actions)
 
 Creats a graph of a video metric as PNG files. Currently, it shows bitrate on each frames.
 
@@ -12,7 +12,7 @@ sudo apt install libavcodec-dev libavformat-dev libavfilter-dev libavutil-dev li
 ```
 
 ### Release binary
-To build release binary in `target/release/vbitrate-viewer`, run:
+To build release binary in `target/release/v-metrics`, run:
 
 ```sh
 cargo build --release
