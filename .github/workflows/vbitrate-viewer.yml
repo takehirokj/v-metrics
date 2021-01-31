@@ -1,4 +1,4 @@
-name: vbitrate-viewer
+name: v-metrics
 
 on:
   push:
