@@ -1,4 +1,4 @@
-name: v-metrics
+name: vbit-plotter
 
 on:
   push:
